@@ -1,5 +1,5 @@
-var Grid = require('./main').Grid;
-var Vector = require('./main').Vector;
+var Grid = require('./world').Grid;
+var Vector = require('./world').Vector;
 
 
 describe("Grid", function () {

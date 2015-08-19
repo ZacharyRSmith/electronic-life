@@ -6,7 +6,7 @@ var World = require('./world').World;
 
 
 var plan = ["############################",
-            "#      #    #      o      ##",
+            "#o     #    #      o      ##",
             "#                          #",
             "#          #####           #",
             "##         #   #    ##     #",
@@ -20,16 +20,7 @@ var plan = ["############################",
 
 var world = new World(plan, {"#": Wall,
                              "o": BouncingCritter});
-console.log(world.toString());
-// → ############################
-//   #      #    #      o      ##
-//   #                          #
-//   #          #####           #
-//   ##         #   #    ##     #
-//   ###           ##     #     #
-//   #           ###      #     #
-//   #   ####                   #
-//   #   ##       o             #
-//   # o  #         o       ### #
-//   #    #                     #
-//   ############################
+setInterval(function(){
+	world.turn();
+  console.log(world.toString());
+}, 500);

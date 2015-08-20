@@ -1,7 +1,60 @@
 var charFromElement = require('./_helpers').charFromElement;
 var elementFromChar = require('./_helpers').elementFromChar;
 var randomElement = require('./_helpers').randomElement;
+var UserCritter = require('./critters').UserCritter;
 
+
+var actionTypes = {
+	eat: function (critter, vector, action) {
+		var dest = this._checkDestination(action, vector);
+		var atDest = (dest && this.grid.get(dest));
+
+		if (!atDest || !atDest.energy)
+			return false;
+
+		critter.energy += atDest.energy;
+		this.grid.set(dest, null);
+		return true;
+	},
+
+	grow: function (critter) {
+		critter.energy += 0.5;
+		return true;
+	},
+
+	move: function(critter, vector, action) {
+		var dest = this._checkDestination(action, vector);
+
+		if (!dest ||
+				critter.energy <= 1 ||
+				this.grid.get(dest))
+			return false;
+
+		critter.energy -= 1;
+		this.grid.set(vector, null);
+		this.grid.set(dest, critter);
+		return true;
+	},
+
+	reproduce: function(critter, vector, action) {
+		var baby = elementFromChar(this.legend,
+															 critter.originChar),
+				dest = this._checkDestination(action, vector);
+
+		if (baby.constructor === UserCritter)
+			console.log("TRUE");
+			baby = elementFromChar(this.legend, "O");
+
+		if (!dest ||
+				critter.energy <= 2 * baby.energy ||
+				this.grid.get(dest))
+			return false;
+
+		critter.energy -= 2 * baby.energy;
+		this.grid.set(dest, baby);
+		return true;
+	},
+};
 
 var directions = {
   "n":  new Vector( 0, -1),
@@ -151,7 +204,26 @@ World.prototype = {
 	}
 };
 
+function LifelikeWorld (map, legend) {
+	World.call(this, map, legend);
+}
+LifelikeWorld.prototype = Object.create(World.prototype);
+
+LifelikeWorld.prototype._letAct = function(critter, vector) {
+  var action = critter.act(new View(this, vector));
+  var handled = action &&
+    action.type in actionTypes &&
+    actionTypes[action.type].call(this, critter,
+                                  vector, action);
+  if (!handled) {
+    critter.energy -= 0.2;
+    if (critter.energy <= 0)
+      this.grid.set(vector, null);
+  }
+};
+
 module.exports.Grid = Grid;
+module.exports.LifelikeWorld = LifelikeWorld;
 module.exports.Vector = Vector;
 module.exports.Wall = Wall;
 module.exports.World = World;
